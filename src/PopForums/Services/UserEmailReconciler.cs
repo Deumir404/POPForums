@@ -17,7 +17,7 @@ public class UserEmailReconciler : IUserEmailReconciler
 	{
 		_userRepository = userRepository;
 	}
-
+	
 	public async Task<string> GetUniqueEmail(string email, string externalID)
 	{
 		var match = await _userRepository.GetUserByEmail(email);

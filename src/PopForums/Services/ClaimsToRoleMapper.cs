@@ -18,6 +18,7 @@ public class ClaimsToRoleMapper : IClaimsToRoleMapper
 		_roleRepository = roleRepository;
 	}
 
+	//Если у пользователя есть админский токен, то он присваивает роль админа в бд, аналогично для модератора
 	public async Task MapRoles(User user, IEnumerable<Claim> claims)
 	{
 		bool isAdmin = false, isModerator = false;

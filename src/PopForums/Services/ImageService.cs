@@ -41,21 +41,22 @@ public class ImageService : IImageService
 	private readonly IUserRepository _userRepository;
 	private readonly ISettingsManager _settingsManager;
 
+	//Изображение подтверждено
 	public async Task<bool?> IsUserImageApproved(int userImageID)
 	{
 		return await _userImageRepository.IsUserImageApproved(userImageID);
 	}
-
+	//Получить аву пользователя
 	public async Task<UserImage> GetUserImage(int userImageID)
 	{
 		return await _userImageRepository.Get(userImageID);
 	}
-
+	//Одобрить аву пользователя
 	public async Task ApproveUserImage(int userImageID)
 	{
 		await _userImageRepository.ApproveUserImage(userImageID);
 	}
-
+	//Удалить аву пользователя
 	public async Task DeleteUserImage(int userImageID)
 	{
 		var userImage = await _userImageRepository.Get(userImageID);
@@ -69,7 +70,7 @@ public class ImageService : IImageService
 	{
 		return await _userAvatarRepository.GetImageData(userAvatarID);
 	}
-	
+	//Получить аву потоково
 	public async Task<IStreamResponse> GetAvatarImageStream(int userAvatarID)
 	{
 		return await _userAvatarRepository.GetImageStream(userAvatarID);
@@ -80,27 +81,27 @@ public class ImageService : IImageService
 	{
 		return await _userImageRepository.GetImageData(userImageID);
 	}
-
+	//ПОлучить фото пользователя
 	public async Task<IStreamResponse> GetUserImageStream(int userImageID)
 	{
 		return await _userImageRepository.GetImageStream(userImageID);
 	}
-
+	//Получить список неодобренных изображений
 	public async Task<List<UserImage>> GetUnapprovedUserImages()
 	{
 		return await _userImageRepository.GetUnapprovedUserImages();
 	}
-
+	//Получить последние изменения авы
 	public async Task<DateTime?> GetAvatarImageLastModification(int userAvatarID)
 	{
 		return await _userAvatarRepository.GetLastModificationDate(userAvatarID);
 	}
-
+	//Получить последние изменения фото
 	public async Task<DateTime?> GetUserImageLastModifcation(int userImageID)
 	{
 		return await _userImageRepository.GetLastModificationDate(userImageID);
 	}
-
+	//Изменения размеров
 	public byte[] ConstrainResize(byte[] bytes, int maxWidth, int maxHeight, int qualityLevel, bool cropInsteadOfConstrain)
 	{
 		if (bytes == null)
@@ -123,7 +124,7 @@ public class ImageService : IImageService
 			return output.ToArray();
 		}
 	}
-
+	//Получить контейнер всех неодобренных фото
 	public async Task<UserImageApprovalContainer> GetUnapprovedUserImageContainer()
 	{
 		var isNewUserImageApproved = _settingsManager.Current.IsNewUserImageApproved;

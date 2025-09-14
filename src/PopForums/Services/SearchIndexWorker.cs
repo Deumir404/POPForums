@@ -7,6 +7,7 @@ public interface ISearchIndexWorker
 
 public class SearchIndexWorker(IErrorLog errorLog, ISearchIndexSubsystem searchIndexSubsystem, ISearchService searchService) : ISearchIndexWorker
 {
+	//Создать подпрограмму для индексацию  тем
 	public async void Execute()
 	{
 		try

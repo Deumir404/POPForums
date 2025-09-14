@@ -43,7 +43,7 @@ public class PostMasterService : IPostMasterService
 		_topicViewCountService = topicViewCountService;
 		_postImageService = postImageService;
 	}
-
+	//Запостить новую тему
 	public async Task<BasicServiceResponse<Topic>> PostNewTopic(User user, NewPost newPost, string ip, string userUrl, Func<Topic, string> topicLinkGenerator, Func<Topic, string> redirectLinkGenerator)
 	{
 		if (user == null)
@@ -90,17 +90,17 @@ public class PostMasterService : IPostMasterService
 
 		return new BasicServiceResponse<Topic> {Data = topic, Message = null, Redirect = redirectLink, IsSuccessful = true};
 	}
-
+	//Получить ошибку о сообщении
 	private BasicServiceResponse<Topic> GetPostFailMessage(string message)
 	{
 		return new BasicServiceResponse<Topic> {Data = null, Message = message, Redirect = null, IsSuccessful = false};
 	}
-
+	//Получить ошибку об ответе
 	private BasicServiceResponse<Post> GetReplyFailMessage(string message)
 	{
 		return new BasicServiceResponse<Post> { Data = null, Message = message, Redirect = null, IsSuccessful = false };
 	}
-
+	//Ответ на пост
 	public async Task<BasicServiceResponse<Post>> PostReply(User user, int parentPostID, string ip, bool isFirstInTopic, NewPost newPost, DateTime postTime, Func<Topic, string> topicLinkGenerator, string userUrl, Func<Post, string> postLinkGenerator, Func<Post, string> redirectLinkGenerator)
 	{
 		if (user == null)
@@ -183,7 +183,7 @@ public class PostMasterService : IPostMasterService
 
 		return new BasicServiceResponse<Post> { Data = post, Message = null, Redirect = redirectLink, IsSuccessful = true };
 	}
-
+	//Редактировании поста
 	public async Task<BasicServiceResponse<Post>> EditPost(int postID, PostEdit postEdit, User editingUser, Func<Post, string> redirectLinkGenerator)
 	{
 		var censoredNewTitle = _textParsingService.Censor(postEdit.Title);
@@ -220,7 +220,7 @@ public class PostMasterService : IPostMasterService
 		await _postImageService.DeleteTempRecords(postEdit.PostImageIDs, postEdit.FullText);
 		return new BasicServiceResponse<Post> { Data = post, IsSuccessful = true, Message = string.Empty, Redirect = redirectLink };
 	}
-
+	//Пост во время временного таймера
 	private async Task<bool> IsNewPostDupeOrInTimeLimit(string parsedPost, User user)
 	{
 		var postID = await _profileRepository.GetLastPostID(user.UserID);

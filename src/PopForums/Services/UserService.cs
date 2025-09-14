@@ -80,7 +80,7 @@ public class UserService : IUserService
 		_imageService = imageService;
 		_config = config;
 	}
-
+	//Установить пароль
 	public async Task SetPassword(User targetUser, string password, string ip, User user)
 	{
 		var salt = Guid.NewGuid();
@@ -88,7 +88,7 @@ public class UserService : IUserService
 		await _userRepository.SetHashedPassword(targetUser, hashedPassword, salt);
 		await _securityLogService.CreateLogEntry(user, targetUser, ip, string.Empty, SecurityLogType.PasswordChange);
 	}
-
+	//Проверить пароль
 	public async Task<Tuple<bool, Guid?>> CheckPassword(string email, string password)
 	{
 		string hashedPassword;
@@ -108,6 +108,7 @@ public class UserService : IUserService
 	/// This method is used to maintain compatibility with really old and crusty instances of POP Forums
 	/// that used MD5 to hash passwords. It upgrades those passwords if they match.
 	/// </summary>
+	//ПРоверить последний пароль с новым для улучшения безопасности
 	private async Task<bool> CheckOldHashedPassword(string email, string password, Guid? salt, string storedHash)
 	{
 		string hashedPassword;
@@ -124,14 +125,14 @@ public class UserService : IUserService
 		}
 		return false;
 	}
-
+	//Получить пользователя по ИД
 	public async Task<User> GetUser(int userID)
 	{
 		var user = await _userRepository.GetUser(userID);
 		await PopulateRoles(user);
 		return user;
 	}
-
+	//Получить пользоватля по имени
 	public async Task<User> GetUserByName(string name)
 	{
 		if (string.IsNullOrWhiteSpace(name))
@@ -143,14 +144,14 @@ public class UserService : IUserService
 		await PopulateRoles(user);
 		return user;
 	}
-
+	//Получить ключ авторизации для пользователя
 	public async Task<User> GetUserByAuhtorizationKey(Guid authorizationKey)
 	{
 		var user = await _userRepository.GetUserByAuthorizationKey(authorizationKey);
 		await PopulateRoles(user);
 		return user;
 	}
-
+	//Получить пользователя по email
 	public async Task<User> GetUserByEmail(string email)
 	{
 		if (string.IsNullOrWhiteSpace(email))
@@ -160,28 +161,28 @@ public class UserService : IUserService
 		await PopulateRoles(user);
 		return user;
 	}
-
+	//Получить пользователей по ID
 	public async Task<List<User>> GetUsersFromIDs(IList<int> ids)
 	{
 		return await _userRepository.GetUsersFromIDs(ids);
 	}
-
+	//Получить роли пользователя
 	private async Task PopulateRoles(User user)
 	{
 		if (user != null)
 			user.Roles = await _roleRepository.GetUserRoles(user.UserID);
 	}
-
+	//Проверить уникальность имени
 	public async Task<bool> IsNameInUse(string name)
 	{
 		return await GetUserByName(name) != null;
 	}
-
+	//Проверить уникальности почты
 	public async Task<bool> IsEmailInUse(string email)
 	{
 		return await GetUserByEmail(email) != null;
 	}
-
+	//Проверить использует ли другой пользователь этот email
 	public async Task<bool> IsEmailInUseByDifferentUser(User user, string email)
 	{
 		var otherUser = await GetUserByEmail(email);
@@ -189,17 +190,17 @@ public class UserService : IUserService
 			return false;
 		return otherUser.Email != user.Email;
 	}
-
+	//Забанен ли IP
 	public async Task<bool> IsIPBanned(string ip)
 	{
 		return await _banRepository.IPIsBanned(ip);
 	}
-
+	//Забанен ли email
 	public async Task<bool> IsEmailBanned(string email)
 	{
 		return await _banRepository.EmailIsBanned(email);
 	}
-
+	//Создать пользователя с профилем
 	public async Task<User> CreateUserWithProfile(SignupData signupData, string ip)
 	{
 		var isApproved = _config.IsOAuthOnly || _settingsManager.Current.IsNewUserApproved;
@@ -214,7 +215,7 @@ public class UserService : IUserService
 		await _profileRepository.Create(profile);
 		return user;
 	}
-
+	//Создать пользователя
 	public async Task<User> CreateUser(string name, string email, string password, bool isApproved, string ip)
 	{
 		name = _textParsingService.Censor(name);
@@ -238,7 +239,7 @@ public class UserService : IUserService
 		await _securityLogService.CreateLogEntry(null, user, ip, string.Empty, SecurityLogType.UserCreated);
 		return user;
 	}
-
+	//Удалить пользователя
 	public async Task DeleteUser(User targetUser, User user, string ip, bool ban)
 	{
 		if (ban)
@@ -246,17 +247,17 @@ public class UserService : IUserService
 		await _userRepository.DeleteUser(targetUser);
 		await _securityLogService.CreateLogEntry(user, targetUser, ip, $"Name: {targetUser.Name}, E-mail: {targetUser.Email}", SecurityLogType.UserDeleted);
 	}
-
+	//Получить последнию активность
 	public async Task UpdateLastActivityDate(User user)
 	{
 		await _userRepository.UpdateLastActivityDate(user, DateTime.UtcNow);
 	}
-
+	//Изменить email
 	public async Task ChangeEmail(User targetUser, string newEmail, User user, string ip)
 	{
 		await ChangeEmail(targetUser, newEmail, user, ip, _settingsManager.Current.IsNewUserApproved);
 	}
-
+	//Изменить email(основная часть)
 	public async Task ChangeEmail(User targetUser, string newEmail, User user, string ip, bool isUserApproved)
 	{
 		if (!newEmail.IsEmailAddress())
@@ -269,7 +270,7 @@ public class UserService : IUserService
 		await _userRepository.UpdateIsApproved(targetUser, isUserApproved);
 		await _securityLogService.CreateLogEntry(user, targetUser, ip, $"Old: {oldEmail}, New: {newEmail}", SecurityLogType.EmailChange);
 	}
-
+	//Изменить имя
 	public async Task ChangeName(User targetUser, string newName, User user, string ip)
 	{
 		if (string.IsNullOrEmpty(newName))
@@ -281,7 +282,7 @@ public class UserService : IUserService
 		targetUser.Name = newName;
 		await _securityLogService.CreateLogEntry(user, targetUser, ip, $"Old: {oldName}, New: {newName}", SecurityLogType.NameChange);
 	}
-
+	//Обновить или одобрить пользователя
 	public async Task UpdateIsApproved(User targetUser, bool isApproved, User user, string ip)
 	{
 		if (targetUser == null)
@@ -290,20 +291,20 @@ public class UserService : IUserService
 		var logType = isApproved ? SecurityLogType.IsApproved : SecurityLogType.IsNotApproved;
 		await _securityLogService.CreateLogEntry(user, targetUser, ip, String.Empty, logType);
 	}
-
+	//Обновить ключ авторизации
 	public async Task UpdateAuthorizationKey(User user, Guid key)
 	{
 		if (user == null)
 			throw new ArgumentNullException("user");
 		await _userRepository.UpdateAuthorizationKey(user, key);
 	}
-
+	//Выход
 	public async Task Logout(User user, string ip)
 	{
 		// used only for logging; controller performs actual logout
 		await _securityLogService.CreateLogEntry(null, user, ip, String.Empty, SecurityLogType.Logout);
 	}
-
+	//Вход
 	public async Task<Tuple<bool, User>> Login(string email, string password, string ip)
 	{
 		User user;
@@ -329,18 +330,18 @@ public class UserService : IUserService
 		await _userRepository.UpdateLastLoginDate(user, DateTime.UtcNow);
 		await _securityLogService.CreateLogEntry(null, user, ip, String.Empty, SecurityLogType.Login);
 	}
-
+	//Получить все роли
 	public async Task<List<string>> GetAllRoles()
 	{
 		return await _roleRepository.GetAllRoles();
 	}
-
+	//Присвоить новую роль
 	public async Task CreateRole(string role, User user, string ip)
 	{
 		await _roleRepository.CreateRole(role);
 		await _securityLogService.CreateLogEntry(user, null, ip, "Role: " + role, SecurityLogType.RoleCreated);
 	}
-
+	//Удалить роль
 	public async Task DeleteRole(string role, User user, string ip)
 	{
 		if (role.ToLower() == PermanentRoles.Admin.ToLower() || role.ToLower() == PermanentRoles.Moderator.ToLower())
@@ -348,7 +349,7 @@ public class UserService : IUserService
 		await _roleRepository.DeleteRole(role);
 		await _securityLogService.CreateLogEntry(user, null, ip, "Role: " + role, SecurityLogType.RoleDeleted);
 	}
-
+	//Проверка ключа входа
 	public async Task<User> VerifyAuthorizationCode(Guid key, string ip)
 	{
 		var targetUser = await _userRepository.GetUserByAuthorizationKey(key);
@@ -360,22 +361,22 @@ public class UserService : IUserService
 		targetUser.AuthorizationKey = newKey;
 		return targetUser;
 	}
-
+	//Поиск пользователя по почте
 	public async Task<List<User>> SearchByEmail(string email)
 	{
 		return await _userRepository.SearchByEmail(email);
 	}
-
+	//Поиск пользователя по имени
 	public async Task<List<User>> SearchByName(string name)
 	{
 		return await _userRepository.SearchByName(name);
 	}
-
+	//Поиск пользователей по роли
 	public async Task<List<User>> SearchByRole(string role)
 	{
 		return await _userRepository.SearchByRole(role);
 	}
-
+	//Получить профиль для редактирования
 	public async Task<UserEdit> GetUserEdit(User user)
 	{
 		if (user == null)
@@ -396,6 +397,7 @@ public class UserService : IUserService
 	/// <param name="ip"></param>
 	/// <param name="user"></param>
 	/// <returns></returns>
+	//Изменить пользователя
 	public async Task EditUser(User targetUser, UserEdit userEdit, bool removeAvatar, bool removePhoto, byte[] avatarFile, byte[] photoFile, string ip, User user)
 	{
 		if (!string.IsNullOrWhiteSpace(userEdit.NewEmail))
@@ -449,7 +451,7 @@ public class UserService : IUserService
 			await _profileRepository.Update(profile);
 		}
 	}
-
+	//Изменить изображения пользователя
 	public async Task EditUserProfileImages(User user, bool removeAvatar, bool removePhoto, byte[] avatarFile, byte[] photoFile)
 	{
 		var profile = await _profileRepository.GetProfile(user.UserID);
@@ -483,7 +485,7 @@ public class UserService : IUserService
 			await _profileRepository.Update(profile);
 		}
 	}
-
+	//Пароль достаточно надежный
 	public bool IsPasswordValid(string password, out string errorMessage)
 	{
 		if (String.IsNullOrEmpty(password) || password.Length < 6)
@@ -494,17 +496,17 @@ public class UserService : IUserService
 		errorMessage = null;
 		return true;
 	}
-
+	//ПОлучить активных пользователей
 	public async Task<List<User>> GetUsersOnline()
 	{
 		return await _userRepository.GetUsersOnline();
 	}
-
+	//Получить всех пользователей
 	public async Task<int> GetTotalUsers()
 	{
 		return await _userRepository.GetTotalUsers();
 	}
-
+	//Создания пароля для сброса email
 	public async Task GeneratePasswordResetEmail(User user, string resetLink)
 	{
 		if (user == null)
@@ -515,14 +517,14 @@ public class UserService : IUserService
 		var link = resetLink + "/" + newAuth;
 		await _forgotPasswordMailer.ComposeAndQueue(user, link);
 	}
-
+	//Сброс пароля
 	public async Task ResetPassword(User user, string newPassword, string ip)
 	{
 		await SetPassword(user, newPassword, ip, null);
 		await UpdateAuthorizationKey(user, Guid.NewGuid());
 		await Login(user, ip);
 	}
-
+	//Получить подписчкиов
 	public async Task<List<User>> GetSubscribedUsers()
 	{
 		return await _userRepository.GetSubscribedUsers();
@@ -532,7 +534,7 @@ public class UserService : IUserService
 	{
 		return _userRepository.GetUsersByPointTotals(top);
 	}
-
+	
 	public async Task<List<UserResult>> GetRecentUsers()
 	{
 		var userResults = await _userRepository.GetRecentUsers();

@@ -19,31 +19,37 @@ public class BanService : IBanService
 
 	private readonly IBanRepository _banRepository;
 
+	//Добавить в список забанненых IP 
 	public async Task BanIP(string ip)
 	{
 		await _banRepository.BanIP(ip.Trim());
 	}
 
+	//Разбанить IP
 	public async Task RemoveIPBan(string ip)
 	{
 		await _banRepository.RemoveIPBan(ip);
 	}
 
+	//Получить все забанненные IP
 	public async Task<List<string>> GetIPBans()
 	{
 		return await _banRepository.GetIPBans();
 	}
 
+	//ЗАбанить по email
 	public async Task BanEmail(string email)
 	{
 		await _banRepository.BanEmail(email.Trim());
 	}
 
+	//Разбанить email
 	public async Task RemoveEmailBan(string email)
 	{
 		await _banRepository.RemoveEmailBan(email);
 	}
 
+	//Получить список всех забанненых email
 	public async Task<List<string>> GetEmailBans()
 	{
 		return await _banRepository.GetEmailBans();

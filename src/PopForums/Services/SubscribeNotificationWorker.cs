@@ -7,6 +7,7 @@ public interface ISubscribeNotificationWorker
 
 public class SubscribeNotificationWorker(ISubscribeNotificationRepository subscribeNotificationRepository, ISubscribedTopicsService subscribedTopicsService, INotificationAdapter notificationAdapter, IErrorLog errorLog) : ISubscribeNotificationWorker
 {
+	//Создать подмодуль для уведомлений пользователей
 	public async void Execute()
 	{
 		try

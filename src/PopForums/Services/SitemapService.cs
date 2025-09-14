@@ -19,7 +19,7 @@ public class SitemapService : ISitemapService
 		_topicRepository = topicRepository;
 		_forumRepository = forumRepository;
 	}
-
+	//Создать индекс для страниц
 	public async Task<string> GenerateIndex(Func<int, string> pageLinkGenerator)
 	{
 		var pageCount = await GetSitemapPageCount();
@@ -36,7 +36,7 @@ public class SitemapService : ISitemapService
 		var result = s.ToString();
 		return result;
 	}
-
+	//Создать страницу
 	public async Task<string> GeneratePage(Func<string, string> topicLinkGenerator, int page)
 	{
 		var nonViewableForumGraph = await _forumRepository.GetForumViewRestrictionRoleGraph();
@@ -59,7 +59,7 @@ public class SitemapService : ISitemapService
 		var result = s.ToString();
 		return result;
 	}
-
+	//Получить количество страниц
 	public async Task<int> GetSitemapPageCount()
 	{
 		var nonViewableForumGraph = await _forumRepository.GetForumViewRestrictionRoleGraph();

@@ -33,22 +33,22 @@ public class PrivateMessageService : IPrivateMessageService
 	private readonly IBroker _broker;
 
 	private static int _postPageSize = 20;
-
+	//Получить личные сообщение пользователя
 	public async Task<PrivateMessage> Get(int pmID, int userID)
 	{
 		return await _privateMessageRepository.Get(pmID, userID);
 	}
-
+	
 	public async Task<List<PrivateMessagePost>> GetMostRecentPosts(int pmID, DateTime afterDateTime)
 	{
 		return await _privateMessageRepository.GetPosts(pmID, afterDateTime);
 	}
-
+	//Получить посты из личных сообщений
 	public async Task<List<PrivateMessagePost>> GetPosts(int pmID, DateTime beforeDateTime)
 	{
 		return await _privateMessageRepository.GetPosts(pmID, beforeDateTime, _postPageSize);
 	}
-
+	//Получить личные сообщения
 	public async Task<Tuple<List<PrivateMessage>, PagerContext>> GetPrivateMessages(User user, PrivateMessageBoxType boxType, int pageIndex)
 	{
 		var total = await _privateMessageRepository.GetBoxCount(user.UserID, boxType);
@@ -59,12 +59,12 @@ public class PrivateMessageService : IPrivateMessageService
 		var messages = await _privateMessageRepository.GetPrivateMessages(user.UserID, boxType, startRow, pageSize);
 		return Tuple.Create(messages, pagerContext);
 	}
-
+	//Получить счётчик непрочитанных сообщений
 	public async Task<int> GetUnreadCount(int userID)
 	{
 		return await _privateMessageRepository.GetUnreadCount(userID);
 	}
-
+	//Создать личное сообщение
 	public async Task<PrivateMessage> Create(string fullText, User user, List<User> toUsers)
 	{
 		if (String.IsNullOrWhiteSpace(fullText))
@@ -111,7 +111,7 @@ public class PrivateMessageService : IPrivateMessageService
 		}
 		return pm;
 	}
-
+	//Механизм ответа
 	public async Task Reply(PrivateMessage pm, string fullText, User user)
 	{
 		if (pm == null || pm.PMID == 0)
@@ -144,35 +144,35 @@ public class PrivateMessageService : IPrivateMessageService
 			_broker.NotifyPMCount(receiver.UserID, receiverPMCount);
 		}
 	}
-
+	//Есть ли у пользователя приватные сообщения
 	public async Task<bool> IsUserInPM(int userID, int pmID)
 	{
 		var pmUsers = await _privateMessageRepository.GetUsers(pmID);
 		return pmUsers.Count(p => p.UserID == userID) != 0;
 	}
-
+	//Отметить сообщение как прочитанным
 	public async Task MarkPMRead(int userID, int pmID)
 	{
 		await _privateMessageRepository.SetLastViewTime(pmID, userID, DateTime.UtcNow);
 		var pmCount = await _privateMessageRepository.GetUnreadCount(userID);
 		_broker.NotifyPMCount(userID, pmCount);
 	}
-
+	//Заархивироать приватные сообщения
 	public async Task Archive(User user, PrivateMessage pm)
 	{
 		await _privateMessageRepository.SetArchive(pm.PMID, user.UserID, true);
 	}
-
+	//Разархивировать приватные сообщения
 	public async Task Unarchive(User user, PrivateMessage pm)
 	{
 		await _privateMessageRepository.SetArchive(pm.PMID, user.UserID, false);
 	}
-
+	//Получить первое непрочитанное сообщение
 	public async Task<int?> GetFirstUnreadPostID(int pmID, DateTime lastViewDate)
 	{
 		return await _privateMessageRepository.GetFirstUnreadPostID(pmID, lastViewDate);
 	}
-
+	//Получить всех пользователей, которые имееют приватные сообщения
 	public async Task<List<PrivateMessageUser>> GetUsers(int pmID)
 	{
 		return await _privateMessageRepository.GetUsers(pmID);

@@ -43,16 +43,19 @@ public class ForumService : IForumService
 	private readonly ISettingsManager _settingsManager;
 	private readonly ILastReadService _lastReadService;
 
+	//Получить форум по ID
 	public async Task<Forum> Get(int forumID)
 	{
 		return await _forumRepository.Get(forumID);
 	}
 
+	//Получить форум по url
 	public async Task<Forum> Get(string urlName)
 	{
 		return await _forumRepository.Get(urlName);
 	}
 
+	// Создания форума 
 	public async Task<Forum> Create(int? categoryID, string title, string description, bool isVisible, bool isArchived, int sortOrder, string forumAdapterName, bool isQAForum)
 	{
 		var urlName = title.ToUniqueUrlName(await _forumRepository.GetUrlNamesThatStartWith(title.ToUrlName()));
@@ -63,6 +66,7 @@ public class ForumService : IForumService
 		return forum;
 	}
 
+	//Изменение форума
 	public async Task Update(Forum forum, int? categoryID, string title, string description, bool isVisible, bool isArchived, string forumAdapterName, bool isQAForum)
 	{
 		var urlName = forum.UrlName;
@@ -70,7 +74,7 @@ public class ForumService : IForumService
 			urlName = title.ToUniqueUrlName(await _forumRepository.GetUrlNamesThatStartWith(title.ToUrlName()));
 		await _forumRepository.Update(forum.ForumID, categoryID, title, description, isVisible, isArchived, urlName, forumAdapterName, isQAForum);
 	}
-
+	//Обновить дату счётчика последнего поста
 	public async Task UpdateLast(Forum forum)
 	{
 		var topic = await _topicRepository.GetLastUpdatedTopic(forum.ForumID);
@@ -79,12 +83,12 @@ public class ForumService : IForumService
 		else
 			await UpdateLast(forum, new DateTime(2000, 1, 1), String.Empty);
 	}
-
+	//Обновить последний пост, время, название
 	public async Task UpdateLast(Forum forum, DateTime lastTime, string lastName)
 	{
 		await _forumRepository.UpdateLastTimeAndUser(forum.ForumID, lastTime, lastName);
 	}
-
+	// Расчёт счётков постов по форумам и темам
 	public void UpdateCounts(Forum forum)
 	{
 		new Thread(() =>
@@ -94,7 +98,7 @@ public class ForumService : IForumService
 			_forumRepository.UpdateTopicAndPostCounts(forum.ForumID, topicCount, postCount);
 		}).Start();
 	}
-
+	//ПОслучить темы из форумов
 	public async Task<CategorizedForumContainer> GetCategorizedForumContainer()
 	{
 		var forums = _forumRepository.GetAll();
@@ -103,7 +107,7 @@ public class ForumService : IForumService
 		container.ForumTitle = _settingsManager.Current.ForumTitle;
 		return container;
 	}
-
+	//Получить темы вместе с форумами
 	public async Task<List<CategoryContainerWithForums>> GetCategoryContainersWithForums()
 	{
 		var containers = new List<CategoryContainerWithForums>();
@@ -121,7 +125,7 @@ public class ForumService : IForumService
 		}
 		return containers;
 	}
-
+	//Получить список недоступных форумов жля конкретного пользователя
 	public async Task<List<int>> GetViewableForumIDsFromViewRestrictedForums(User user)
 	{
 		var nonViewableForumIDs = await GetNonViewableForumIDs(user);
@@ -129,7 +133,7 @@ public class ForumService : IForumService
 		var noViewRestrictionForums = forums.Where(f => !nonViewableForumIDs.Contains(f.ForumID));
 		return noViewRestrictionForums.Select(x => x.ForumID).ToList();
 	}
-
+	// Получить категории с форумами к когкретному пользователю
 	public async Task<CategorizedForumContainer> GetCategorizedForumContainerFilteredForUser(User user)
 	{
 		var nonViewableForumIDs = await GetNonViewableForumIDs(user);
@@ -141,7 +145,7 @@ public class ForumService : IForumService
 		container.ForumTitle = _settingsManager.Current.ForumTitle;
 		return container;
 	}
-
+	//Получить список форумов по пользователю
 	public async Task<List<int>> GetNonViewableForumIDs(User user)
 	{
 		var forumsWithRestrictions = await _forumRepository.GetForumViewRestrictionRoleGraph();
@@ -155,14 +159,14 @@ public class ForumService : IForumService
 		}
 		return nonViewableForums;
 	}
-
+	//Обновить сортировку форума
 	private async Task ChangeForumSortOrder(Forum forum, int change)
 	{
 		var forums = await _forumRepository.GetForumsInCategory(forum.CategoryID);
 		forums.Single(c => c.ForumID == forum.ForumID).SortOrder += change;
 		await SortAndUpdateForums(forums);
 	}
-
+	//Отсортировать все форумы
 	private async Task SortAndUpdateForums(IEnumerable<Forum> forums)
 	{
 		var sorted = forums.OrderBy(f => f.SortOrder).ToList();
@@ -173,7 +177,7 @@ public class ForumService : IForumService
 			await _forumRepository.UpdateSortOrder(correctedForum.ForumID, correctedForum.SortOrder);
 		}
 	}
-
+	//ПОднять форум выше
 	public async Task MoveForumUp(int forumID)
 	{
 		var forum = await _forumRepository.Get(forumID);
@@ -182,7 +186,7 @@ public class ForumService : IForumService
 		const int change = -3;
 		await ChangeForumSortOrder(forum, change);
 	}
-
+	//Опустить форум ниже
 	public async Task MoveForumDown(int forumID)
 	{
 		var forum = await _forumRepository.Get(forumID);
@@ -191,22 +195,22 @@ public class ForumService : IForumService
 		const int change = 3;
 		await ChangeForumSortOrder(forum, change);
 	}
-
+	//ПОлучить роли из форума
 	public async Task<List<string>> GetForumPostRoles(Forum forum)
 	{
 		return await _forumRepository.GetForumPostRoles(forum.ForumID);
 	}
-
+	//Получить роли для просмотра
 	public async Task<List<string>> GetForumViewRoles(Forum forum)
 	{
 		return await _forumRepository.GetForumViewRoles(forum.ForumID);
 	}
-
+	//Получить список названий форумов
 	public Dictionary<int, string> GetAllForumTitles()
 	{
 		return _forumRepository.GetAllForumTitles();
 	}
-
+	//Получить недавние темы
 	public async Task<Tuple<List<Topic>, PagerContext>> GetRecentTopics(User user, bool includeDeleted, int pageIndex)
 	{
 		var nonViewableForumIDs = await GetNonViewableForumIDs(user);
@@ -218,17 +222,17 @@ public class ForumService : IForumService
 		var pagerContext = new PagerContext { PageCount = totalPages, PageIndex = pageIndex, PageSize = pageSize };
 		return Tuple.Create(topics, pagerContext);
 	}
-
+	//Получить количество тем
 	public async Task<int> GetAggregateTopicCount()
 	{
 		return await _forumRepository.GetAggregateTopicCount();
 	}
-
+	//ПОлучить количество постов
 	public async Task<int> GetAggregatePostCount()
 	{
 		return await _forumRepository.GetAggregatePostCount();
 	}
-
+	//Получить информацию по каждому посту по контейнеру
 	public TopicContainerForQA MapTopicContainerForQA(TopicContainer topicContainer)
 	{
 		var result = new TopicContainerForQA
@@ -271,7 +275,7 @@ public class ForumService : IForumService
 		}
 		return result;
 	}
-
+	//Модификация ролей в форуме
 	public async Task ModifyForumRoles(ModifyForumRolesContainer container)
 	{
 		var forum = await Get(container.ForumID);

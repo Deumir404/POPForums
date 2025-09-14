@@ -23,7 +23,7 @@ public class UserSessionService : IUserSessionService
 	private readonly ISecurityLogService _securityLogService;
 
 	public const string _sessionIDCookieName = "pf_sessionID";
-
+	//Обработать запрос пользователя на вход
 	public async Task<int> ProcessUserRequest(User user, int? sessionID, string ip, Action deleteSession, Action<int> createSession)
 	{
 		int? userID = null;
@@ -55,7 +55,7 @@ public class UserSessionService : IUserSessionService
 		}
 		return sessionID.Value;
 	}
-
+	//Создать новую сессию
 	private async Task<int> StartNewSession(int? userID, string ip, Action<int> createSession)
 	{
 		if (userID.HasValue)
@@ -71,13 +71,13 @@ public class UserSessionService : IUserSessionService
 		createSession(sessionID);
 		return sessionID;
 	}
-
+	//Закончить и удалить сессию
 	private async Task EndAndDeleteSession(ExpiredUserSession oldUserSession)
 	{
 		await _securityLogService.CreateLogEntry(null, oldUserSession.UserID, string.Empty, oldUserSession.SessionID.ToString(), SecurityLogType.UserSessionEnd, oldUserSession.LastTime);
 		await _userSessionRepository.DeleteSessions(oldUserSession.UserID, oldUserSession.SessionID);
 	}
-
+	//Очистить старые сессии
 	public async Task CleanUpExpiredSessions()
 	{
 		var cutOff = DateTime.UtcNow.Subtract(new TimeSpan(0, _settingsManager.Current.SessionLength, 0));
@@ -85,7 +85,7 @@ public class UserSessionService : IUserSessionService
 		foreach (var session in expiredSessions)
 			await _securityLogService.CreateLogEntry(null, session.UserID, string.Empty, session.SessionID.ToString(), SecurityLogType.UserSessionEnd, session.LastTime);
 	}
-
+	//Получить количество сессий
 	public async Task<int> GetTotalSessionCount()
 	{
 		return await _userSessionRepository.GetTotalSessionCount();

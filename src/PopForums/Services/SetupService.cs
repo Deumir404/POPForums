@@ -27,7 +27,7 @@ public class SetupService : ISetupService
 	private static bool _isConnectionSetupGood;
 
 	private static readonly object _locker = new();
-
+	//Полный запуск сервисов
 	public bool IsRuntimeConnectionAndSetupGood()
 	{
 		if (_isConnectionSetupGood)
@@ -40,17 +40,17 @@ public class SetupService : ISetupService
 		}
 		return _isConnectionSetupGood;
 	}
-
+	//Если сеть работает
 	public bool IsConnectionPossible()
 	{
 		return _setupRepository.IsConnectionPossible();
 	}
-
+	//Настройка базы данных
 	public bool IsDatabaseSetup()
 	{
 		return _setupRepository.IsDatabaseSetup();
 	}
-
+	//Настройка базы без настройки
 	public Exception SetupDatabaseWithoutSettingsOrUser()
 	{
 		try
@@ -64,7 +64,7 @@ public class SetupService : ISetupService
 
 		return null;
 	}
-
+	//Настрой базы данных
 	public async Task<Tuple<User, Exception>> SetupDatabase(SetupVariables setupVariables)
 	{
 		Exception exception = null;

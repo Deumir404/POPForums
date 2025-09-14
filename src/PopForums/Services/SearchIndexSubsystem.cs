@@ -21,7 +21,7 @@ public class SearchIndexSubsystem : ISearchIndexSubsystem
 		_postService = postService;
 		_topicService = topicService;
 	}
-
+	//Сделать индексацию
 	public void DoIndex(int topicID, string tenantID, bool isForRemoval)
 	{
 		_searchService.DeleteAllIndexedWordsForTopic(topicID);
@@ -74,7 +74,7 @@ public class SearchIndexSubsystem : ISearchIndexSubsystem
 	public void RemoveIndex(int topicID, string tenantID)
 	{
 	}
-
+	//Сделать тестовый индекс
 	private void TestForIndex(Topic topic, string testWord, int increment, int multiplier, bool cap, List<SearchWord> wordList, List<String> junkList)
 	{
 		testWord = testWord.ToLower();

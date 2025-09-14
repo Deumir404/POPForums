@@ -7,6 +7,7 @@ public interface IUserSessionWorker
 
 public class UserSessionWorker(IUserSessionService sessionService, IErrorLog errorLog) : IUserSessionWorker
 {
+	//Создать сервис для очистки старых сессий
 	public async void Execute()
 	{
 		try

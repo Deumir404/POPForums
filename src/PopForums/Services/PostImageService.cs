@@ -38,6 +38,7 @@ public class PostImageService : IPostImageService
 
 	private const int HoursOldToDelete = 8;
 
+	//Проверка загружано ли изображение корректно
 	public bool ProcessImageIsOk(byte[] bytes, string contentType)
 	{
 		_contentType = contentType;
@@ -60,7 +61,7 @@ public class PostImageService : IPostImageService
 		_isOk = true;
 		return true;
 	}
-
+	
 	public async Task<PostImagePersistPayload> PersistAndGetPayload()
 	{
 		if (_bytes == null || string.IsNullOrWhiteSpace(_contentType))
@@ -72,7 +73,7 @@ public class PostImageService : IPostImageService
 		await _postImageTempRepository.Save(Guid.Parse(payload.ID), DateTime.UtcNow, tenantID);
 		return payload;
 	}
-
+	//Получить фото без данных
 	public async Task<PostImage> GetWithoutData(string id)
 	{
 		var postImageSansData = await _postImageRepository.GetWithoutData(id);
@@ -85,18 +86,18 @@ public class PostImageService : IPostImageService
 		var postImageSansData = await _postImageRepository.Get(id);
 		return postImageSansData;
 	}
-
+	//Получить изображение потоково
 	public async Task<IStreamResponse> GetImageStream(string id)
 	{
 		return await _postImageRepository.GetImageStream(id);
 	}
-
+	//Удалить временные записи
 	public async Task DeleteTempRecord(string id)
 	{
 		var guid = Guid.Parse(id);
 		await _postImageTempRepository.Delete(guid);
 	}
-
+	//Удалить временные записи 
 	public async Task DeleteTempRecords(string[] ids, string fullText)
 	{
 		if (ids == null || ids.Length == 0)
@@ -109,7 +110,7 @@ public class PostImageService : IPostImageService
 		foreach (var id in filtered)
 			await DeleteTempRecord(id);
 	}
-
+	//Удаление старых картинок из постов
 	public async Task DeleteOldPostImages()
 	{
 		var tenantID = _tenantService.GetTenant();

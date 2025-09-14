@@ -26,7 +26,7 @@ public class ForumPermissionService : IForumPermissionService
 		var viewRestrictionRoles = await _forumRepository.GetForumViewRoles(forum.ForumID);
 		var postRestrictionRoles = await _forumRepository.GetForumPostRoles(forum.ForumID);
 
-		// view
+		// Если у пользователя нет запрещенных ролей, то он может смотреть посты на форуме
 		if (viewRestrictionRoles.Count == 0)
 			context.UserCanView = true;
 		else
@@ -36,13 +36,14 @@ public class ForumPermissionService : IForumPermissionService
 				context.UserCanView = true;
 		}
 
-		// post
+		// Если пользователь неавторизован или пользователю запрещено смотреть(забанен) то просмотр недоступен
 		if (user == null || !context.UserCanView)
 		{
 			context.UserCanPost = false;
 			context.DenialReason = Resources.LoginToPost;
 		}
 		else
+		//Если пользователь верифицирован, то он не может постить
 		if (!user.IsApproved)
 		{
 			context.DenialReason += "You can't post until you have verified your account. ";
@@ -50,6 +51,7 @@ public class ForumPermissionService : IForumPermissionService
 		}
 		else
 		{
+			//Если у пользователя есть нет ролей мешающих постить то он может постить
 			if (postRestrictionRoles.Count == 0)
 				context.UserCanPost = true;
 			else
@@ -63,13 +65,13 @@ public class ForumPermissionService : IForumPermissionService
 				}
 			}
 		}
-
+		//Если пользователь пытается запостить по теме, но темы не существует или закрыта, то запрет на пост
 		if (topic != null && topic.IsClosed)
 		{
 			context.UserCanPost = false;
 			context.DenialReason = Resources.Closed + ". ";
 		}
-
+		//Если тема удалена то нельзя постить
 		if (topic != null && topic.IsDeleted)
 		{
 			if (user == null || !user.IsInRole(PermanentRoles.Moderator))
@@ -77,13 +79,14 @@ public class ForumPermissionService : IForumPermissionService
 			context.DenialReason += "Topic is deleted. ";
 		}
 
+		//Если тема заархирована
 		if (forum.IsArchived)
 		{
 			context.UserCanPost = false;
 			context.DenialReason += Resources.Archived + ". ";
 		}
 
-		// moderate
+		// Модерация 
 		context.UserCanModerate = false;
 		if (user != null && (user.IsInRole(PermanentRoles.Admin) || user.IsInRole(PermanentRoles.Moderator)))
 			context.UserCanModerate = true;

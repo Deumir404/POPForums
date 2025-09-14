@@ -7,6 +7,7 @@ public interface IPostImageCleanupWorker
 
 public class PostImageCleanupWorker(IPostImageService postImageService, IErrorLog errorLog) : IPostImageCleanupWorker
 {
+	//Удаления изображений старых постов
 	public async void Execute()
 	{
 		try

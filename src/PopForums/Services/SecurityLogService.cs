@@ -20,17 +20,17 @@ public class SecurityLogService : ISecurityLogService
 
 	private readonly ISecurityLogRepository _securityLogRepository;
 	private readonly IUserRepository _userRepository;
-
+	//Получить список сессий пользователя
 	public async Task<List<SecurityLogEntry>> GetLogEntriesByUserID(int userID, DateTime startDate, DateTime endDate)
 	{
 		return await _securityLogRepository.GetByUserID(userID, startDate, endDate);
 	}
-
+	//Получить список сессий по ip
 	public async Task<List<IPHistoryEvent>> GetIPHistory(string ip, DateTime start, DateTime end)
 	{
 		return await _securityLogRepository.GetIPHistory(ip, start, end);
 	}
-
+	//Получить список сессий по нику
 	public async Task<List<SecurityLogEntry>> GetLogEntriesByUserName(string name, DateTime startDate, DateTime endDate)
 	{
 		var user = await _userRepository.GetUserByName(name);
@@ -38,19 +38,19 @@ public class SecurityLogService : ISecurityLogService
 			return new List<SecurityLogEntry>();
 		return await _securityLogRepository.GetByUserID(user.UserID, startDate, endDate);
 	}
-
+	//Создать сессию
 	public async Task CreateLogEntry(User user, User targetUser, string ip, string message, SecurityLogType securityLogType)
 	{
 		if (!string.IsNullOrEmpty(message) && message.Length > 255)
 			message = message.Substring(0, 255);
 		await CreateLogEntry(user?.UserID, targetUser?.UserID, ip, message, securityLogType);
 	}
-
+	//Создать сессию
 	public async Task CreateLogEntry(int? userID, int? targetUserID, string ip, string message, SecurityLogType securityLogType)
 	{
 		await CreateLogEntry(userID, targetUserID, ip, message, securityLogType, DateTime.UtcNow);
 	}
-
+	//Создать сессию с данными
 	public async Task CreateLogEntry(int? userID, int? targetUserID, string ip, string message, SecurityLogType securityLogType, DateTime timeStamp)
 	{
 		if (ip == null)

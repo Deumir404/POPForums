@@ -23,7 +23,7 @@ public class LastReadService : ILastReadService
 
 	private readonly ILastReadRepository _lastReadRepository;
 	private readonly IPostRepository _postRepository;
-
+	//Пометка о непрочитанном форуму пользователю
 	public async Task MarkForumRead(User user, Forum forum)
 	{
 		if (user == null)
@@ -33,7 +33,7 @@ public class LastReadService : ILastReadService
 		await _lastReadRepository.SetForumRead(user.UserID, forum.ForumID, DateTime.UtcNow);
 		await _lastReadRepository.DeleteTopicReadsInForum(user.UserID, forum.ForumID);
 	}
-
+	//Пометить что все форумы прочитаны
 	public async Task MarkAllForumsRead(User user)
 	{
 		if (user == null)
@@ -41,7 +41,7 @@ public class LastReadService : ILastReadService
 		await _lastReadRepository.SetAllForumsRead(user.UserID, DateTime.UtcNow);
 		await _lastReadRepository.DeleteAllTopicReads(user.UserID);
 	}
-
+	//Пометить что пользователю прочитал тему
 	public async Task MarkTopicRead(User user, Topic topic)
 	{
 		if (user == null)
@@ -50,7 +50,7 @@ public class LastReadService : ILastReadService
 			throw new ArgumentNullException("topic");
 		await _lastReadRepository.SetTopicRead(user.UserID, topic.TopicID, DateTime.UtcNow);
 	}
-
+	//Получить статусы форумов пользователя
 	public async Task GetForumReadStatus(User user, CategorizedForumContainer container)
 	{
 		Dictionary<int, DateTime> lastReads = null;
@@ -69,7 +69,7 @@ public class LastReadService : ILastReadService
 			container.ReadStatusLookup.Add(forum.ForumID, status);
 		}
 	}
-
+	//Получить статус прочтения темы
 	public async Task<DateTime?> GetTopicReadStatus(User user, Topic topic)
 	{
 		if (user != null)
@@ -78,7 +78,7 @@ public class LastReadService : ILastReadService
 		}
 		return null;
 	}
-
+	//Получить статус прочтения форума
 	public async Task<DateTime?> GetForumReadStatus(User user, Forum forum)
 	{
 		if (user != null)
@@ -87,7 +87,7 @@ public class LastReadService : ILastReadService
 		}
 		return null;
 	}
-
+	//Получить статус прочтения темы(перегрузка)
 	public async Task GetTopicReadStatus(User user, PagedTopicContainer container)
 	{
 		Dictionary<int, DateTime> lastForumReads = null;
@@ -125,7 +125,7 @@ public class LastReadService : ILastReadService
 			container.ReadStatusLookup.Add(topic.TopicID, status);
 		}
 	}
-
+	//Получить первый непрочитанный пост в теме
 	public async Task<Post> GetFirstUnreadPost(User user, Topic topic)
 	{
 		if (topic == null)
@@ -145,7 +145,7 @@ public class LastReadService : ILastReadService
 		var firstNew = postIDs.First(p => p.PostTime > lastRead.Value);
 		return await _postRepository.Get(firstNew.PostID);
 	}
-
+	//Получить дату прочтения
 	public async Task<DateTime?> GetLastReadTime(User user, Topic topic)
 	{
 		var lastRead = await _lastReadRepository.GetLastReadTimeForTopic(user.UserID, topic.TopicID);

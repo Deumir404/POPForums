@@ -16,7 +16,7 @@ public class ReCaptchaService : IReCaptchaService
 		_config = config;
 		_securityLogService = securityLogService;
 	}
-
+	//Верификацию токена капчи
 	public async Task<ReCaptchaResponse> VerifyToken(string token, string ip)
 	{
 		var values = new Dictionary<string, string>

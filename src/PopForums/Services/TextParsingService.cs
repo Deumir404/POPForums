@@ -117,7 +117,7 @@ public class TextParsingService : ITextParsingService
 		text = ClientHtmlToForumCode(text);
 		return text;
 	}
-
+	//Получить отцензурированный текст
 	public string Censor(string text)
 	{
 		if (String.IsNullOrEmpty(text))

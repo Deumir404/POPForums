@@ -27,25 +27,25 @@ public class SubscribedTopicsService : ISubscribedTopicsService
 	private readonly ISettingsManager _settingsManager;
 	private readonly INotificationAdapter _notificationAdapter;
 	private readonly ISubscribeNotificationRepository _subscribeNotificationRepository;
-
+	//Добавить подписку на тему
 	public async Task AddSubscribedTopic(int userID, int topicID)
 	{
 		var isSubscribed = await _subscribedTopicsRepository.IsTopicSubscribed(userID, topicID);
 		if (!isSubscribed)
 			await _subscribedTopicsRepository.AddSubscribedTopic(userID, topicID);
 	}
-
+	//Удалить подписку на тему
 	public async Task RemoveSubscribedTopic(User user, Topic topic)
 	{
 		await _subscribedTopicsRepository.RemoveSubscribedTopic(user.UserID, topic.TopicID);
 	}
-
+	//Попытка удалить подписку на тему
 	public async Task TryRemoveSubscribedTopic(User user, Topic topic)
 	{
 		if (user != null && topic != null)
 			await RemoveSubscribedTopic(user, topic);
 	}
-	
+	//Уведомление подписчиков
 	public async Task NotifySubscribers(Topic topic, User postingUser, string tenantID)
 	{
 		var payload = new SubscribeNotificationPayload
@@ -58,7 +58,7 @@ public class SubscribedTopicsService : ISubscribedTopicsService
 		};
 		await _subscribeNotificationRepository.Enqueue(payload);
 	}
-
+	//Получить темы подписанные
 	public async Task<Tuple<List<Topic>, PagerContext>> GetTopics(User user, int pageIndex)
 	{
 		var pageSize = _settingsManager.Current.TopicsPerPage;
@@ -69,12 +69,12 @@ public class SubscribedTopicsService : ISubscribedTopicsService
 		var pagerContext = new PagerContext { PageCount = totalPages, PageIndex = pageIndex, PageSize = pageSize };
 		return Tuple.Create(topics, pagerContext);
 	}
-
+	//Пользователь подписан на тему
 	public async Task<bool> IsTopicSubscribed(int userID, int topicID)
 	{
 		return await _subscribedTopicsRepository.IsTopicSubscribed(userID, topicID);
 	}
-
+	//Получить количество подписчктов на тему
 	public async Task<List<int>> GetSubscribedUserIDs(int topicID)
 	{
 		return await _subscribedTopicsRepository.GetSubscribedUserIDs(topicID);

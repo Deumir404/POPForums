@@ -29,7 +29,7 @@ public class SearchService : ISearchService
 	private readonly IErrorLog _errorLog;
 
 	public static Regex SearchWordPattern = new Regex(@"[\w'\@\#\$\%\^\&\*]{2,}", RegexOptions.None);
-
+	//Получить список тем
 	public async Task<Tuple<Response<List<Topic>>, PagerContext>> GetTopics(string searchTerm, SearchType searchType, User user, bool includeDeleted, int pageIndex)
 	{
 		var nonViewableForumIDs = await _forumService.GetNonViewableForumIDs(user);
@@ -58,33 +58,33 @@ public class SearchService : ISearchService
 		}
 		return Tuple.Create(topics, pagerContext);
 	}
-
+	//Следующая тема для индексации
 	public async Task<SearchIndexPayload> GetNextTopicForIndexing()
 	{
 		var payload = await _searchIndexQueueRepository.Dequeue();
 		return payload;
 	}
-
+	//Удаление мусорных слов
 	public async Task<List<string>> GetJunkWords()
 	{
 		return await _searchRepository.GetJunkWords();
 	}
-
+	//Создание мусорного слова
 	public async Task CreateJunkWord(string word)
 	{
 		await _searchRepository.CreateJunkWord(word);
 	}
-
+	//Удалить из списка мусорных слов
 	public async Task DeleteJunkWord(string word)
 	{
 		await _searchRepository.DeleteJunkWord(word);
 	}
-
+	//Удалить все слова индексации
 	public async Task DeleteAllIndexedWordsForTopic(int topicID)
 	{
 		await _searchRepository.DeleteAllIndexedWordsForTopic(topicID);
 	}
-
+	//Сохранить слово для поиска
 	public async Task SaveSearchWord(SearchWord searchWord)
 	{
 		await _searchRepository.SaveSearchWord(searchWord.TopicID, searchWord.Word, searchWord.Rank);

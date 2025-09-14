@@ -52,6 +52,7 @@ public class TopicService : ITopicService
 	private readonly ITenantService _tenantService;
 	private readonly INotificationAdapter _notificationAdapter;
 
+	//Получить темы постранично
 	public async Task<Tuple<List<Topic>, PagerContext>> GetTopics(Forum forum, bool includeDeleted, int pageIndex)
 	{
 		var pageSize = _settingsManager.Current.TopicsPerPage;
@@ -66,14 +67,14 @@ public class TopicService : ITopicService
 		var pagerContext = new PagerContext { PageCount = totalPages, PageIndex = pageIndex, PageSize = pageSize };
 		return Tuple.Create(topics, pagerContext);
 	}
-
+	//Получить темы
 	public async Task<List<Topic>> GetTopics(User viewingUser, Forum forum, bool includeDeleted)
 	{
 		var nonViewableForumIDs = await _forumService.GetNonViewableForumIDs(viewingUser);
 		var topics = await _topicRepository.Get(forum.ForumID, includeDeleted, nonViewableForumIDs);
 		return topics;
 	}
-
+	//Получить темы постранично
 	public async Task<Tuple<List<Topic>, PagerContext>> GetTopics(User viewingUser, User postUser, bool includeDeleted, int pageIndex)
 	{
 		var nonViewableForumIDs = await _forumService.GetNonViewableForumIDs(viewingUser);
@@ -85,17 +86,17 @@ public class TopicService : ITopicService
 		var pagerContext = new PagerContext { PageCount = totalPages, PageIndex = pageIndex, PageSize = pageSize };
 		return Tuple.Create(topics, pagerContext);
 	}
-
+	//Получить тему по ссылке
 	public async Task<Topic> Get(string urlName)
 	{
 		return await _topicRepository.Get(urlName);
 	}
-
+	//Получить тему по ИД
 	public async Task<Topic> Get(int topicID)
 	{
 		return await _topicRepository.Get(topicID);
 	}
-
+	//Закрыть тему
 	public async Task CloseTopic(Topic topic, User user)
 	{
 		if (user.IsInRole(PermanentRoles.Moderator))
@@ -106,7 +107,7 @@ public class TopicService : ITopicService
 		else
 			throw new InvalidOperationException("User must be Moderator to close topic.");
 	}
-
+	//Открыть тему
 	public async Task OpenTopic(Topic topic, User user)
 	{
 		if (user.IsInRole(PermanentRoles.Moderator))
@@ -117,7 +118,7 @@ public class TopicService : ITopicService
 		else
 			throw new InvalidOperationException("User must be Moderator to open topic.");
 	}
-
+	//Закрепить тему
 	public async Task PinTopic(Topic topic, User user)
 	{
 		if (user.IsInRole(PermanentRoles.Moderator))
@@ -128,7 +129,7 @@ public class TopicService : ITopicService
 		else
 			throw new InvalidOperationException("User must be Moderator to pin topic.");
 	}
-
+	//Открепить тему
 	public async Task UnpinTopic(Topic topic, User user)
 	{
 		if (user.IsInRole(PermanentRoles.Moderator))
@@ -139,7 +140,7 @@ public class TopicService : ITopicService
 		else
 			throw new InvalidOperationException("User must be Moderator to unpin topic.");
 	}
-
+	//Удалить тему
 	public async Task DeleteTopic(Topic topic, User user)
 	{
 		if (user.IsInRole(PermanentRoles.Moderator) || user.UserID == topic.StartedByUserID)
@@ -155,7 +156,7 @@ public class TopicService : ITopicService
 		else
 			throw new InvalidOperationException("User must be Moderator or topic starter to delete topic.");
 	}
-
+	//Полностью удалить тему из бд
 	public async Task HardDeleteTopic(Topic topic, User user)
 	{
 		if (user.IsInRole(PermanentRoles.Admin))
@@ -170,7 +171,7 @@ public class TopicService : ITopicService
 		else
 			throw new InvalidOperationException("User must be Admin to hard delete topic.");
 	}
-
+	//Вернуть тему из удаленных
 	public async Task UndeleteTopic(Topic topic, User user)
 	{
 		if (user.IsInRole(PermanentRoles.Moderator))
@@ -186,7 +187,7 @@ public class TopicService : ITopicService
 		else
 			throw new InvalidOperationException("User must be Moderator to undelete topic.");
 	}
-
+	//Обновить заголовки в теме
 	public async Task UpdateTitleAndForum(Topic topic, Forum forum, string newTitle, User user)
 	{
 		if (user.IsInRole(PermanentRoles.Moderator))
@@ -209,19 +210,19 @@ public class TopicService : ITopicService
 		else
 			throw new InvalidOperationException("User must be Moderator to update topic title or move topic.");
 	}
-
+	//пересчёт ответов в теме
 	public async Task RecalculateReplyCount(Topic topic)
 	{
 		var replyCount = await _postRepository.GetReplyCount(topic.TopicID, false);
 		await _topicRepository.UpdateReplyCount(topic.TopicID, replyCount);
 	}
-
+	//Обновить последнию тему
 	public async Task UpdateLast(Topic topic)
 	{
 		var post = await _postRepository.GetLastInTopic(topic.TopicID);
 		await _topicRepository.UpdateLastTimeAndUser(topic.TopicID, post.UserID, post.Name, post.PostTime);
 	}
-
+	//Получить последний пост темы
 	public async Task<int> TopicLastPostID(int topicID)
 	{
 		var post = await _postRepository.GetLastInTopic(topicID);
@@ -229,7 +230,7 @@ public class TopicService : ITopicService
 			return 0;
 		return post.PostID;
 	}
-
+	//Пометить как ответ 
 	public async Task SetAnswer(User user, Topic topic, Post post, string userUrl, string topicUrl)
 	{
 		if (user.UserID != topic.StartedByUserID)
@@ -248,12 +249,12 @@ public class TopicService : ITopicService
 		await _topicRepository.UpdateAnswerPostID(topic.TopicID, post.PostID);
 		await _notificationAdapter.QuestionAnswer(user.Name, topic.Title, post.PostID, post.UserID);
 	}
-
+	//Создать очерредь для индексации тем
 	public async Task QueueTopicForIndexing(int topicID)
 	{
 		await _searchIndexQueueRepository.Enqueue(new SearchIndexPayload { TenantID = _tenantService.GetTenant(), TopicID = topicID, IsForRemoval = false });
 	}
-
+	//Закрыть все старые темы
 	public async Task CloseAgedTopics()
 	{
 		if (!_settingsManager.Current.IsClosingAgedTopics)

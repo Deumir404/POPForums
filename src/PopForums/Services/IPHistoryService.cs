@@ -15,7 +15,7 @@ public class IPHistoryService : IIPHistoryService
 
 	private readonly IPostService _postService;
 	private readonly ISecurityLogService _securityLogService;
-
+	//Получить историю по ip
 	public async Task<List<IPHistoryEvent>> GetHistory(string ip, DateTime start, DateTime end)
 	{
 		var list = new List<IPHistoryEvent>();

@@ -17,7 +17,7 @@ public class UserNameReconciler : IUserNameReconciler
 	{
 		_userRepository = userRepository;
 	}
-
+	//Сделать уникальные ники для пользователей
 	public async Task<string> GetUniqueNameForUser(string name)
 	{
 		var existingMatches = await _userRepository.GetUserNamesThatStartWith(name);

@@ -18,7 +18,7 @@ public class MailingListService : IMailingListService
 	private readonly IMailingListComposer _mailingListComposer;
 	private readonly IErrorLog _errorLog;
 	private static Thread _mailWorker;
-
+	//Запуск бота рассылки email
 	public void MailUsers(string subject, string body, string htmlBody, Func<User, string> unsubscribeLinkGenerator)
 	{
 		_mailWorker = new Thread(() =>

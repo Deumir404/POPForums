@@ -51,7 +51,7 @@ public class PostService : IPostService
 	private readonly ISearchIndexQueueRepository _searchIndexQueueRepository;
 	private readonly ITenantService _tenantService;
 	private readonly INotificationAdapter _notificationAdapter;
-
+	//Получить посты по теме постарнично
 	public async Task<Tuple<List<Post>, PagerContext>> GetPosts(Topic topic, bool includeDeleted, int pageIndex)
 	{
 		var pageSize = _settingsManager.Current.PostsPerPage;
@@ -66,7 +66,7 @@ public class PostService : IPostService
 		var pagerContext = new PagerContext { PageCount = totalPages, PageIndex = pageIndex, PageSize = pageSize };
 		return Tuple.Create(posts, pagerContext);
 	}
-
+	//Получить посты по теме
 	public async Task<Tuple<List<Post>, PagerContext>> GetPosts(Topic topic, int lastLoadedPostID, bool includeDeleted)
 	{
 		var allPosts = await _postRepository.Get(topic.TopicID, includeDeleted);
@@ -79,17 +79,17 @@ public class PostService : IPostService
 		var pagerContext = new PagerContext { PageCount = totalPages, PageIndex = totalPages, PageSize = pageSize };
 		return Tuple.Create(posts, pagerContext);
 	}
-
+	//Получить посты по теме
 	public async Task<List<Post>> GetPosts(Topic topic, bool includeDeleted)
 	{
 		return await _postRepository.Get(topic.TopicID, includeDeleted);
 	}
-
+	//Получить пост
 	public async Task<Post> Get(int postID)
 	{
 		return await _postRepository.Get(postID);
 	}
-
+	//Получить темы по посту
 	public async Task<Tuple<int, Topic>> GetTopicPageForPost(Post post, bool includeDeleted)
 	{
 		var topic = await _topicService.Get(post.TopicID);
@@ -100,12 +100,12 @@ public class PostService : IPostService
 		var page = Convert.ToInt32(Math.Floor((double)index/pageSize)) + 1;
 		return Tuple.Create(page, topic);
 	}
-
+	//Получить количество постов по пользователю
 	public async Task<int> GetPostCount(User user)
 	{
 		return await _postRepository.GetPostCount(user.UserID);
 	}
-
+	//Получить получить пост для редактирования
 	public async Task<PostEdit> GetPostForEdit(Post post, User user)
 	{
 		if (post == null)
@@ -123,7 +123,7 @@ public class PostService : IPostService
 			postEdit.FullText = _textParsingService.HtmlToClientHtml(post.FullText);
 		return postEdit;
 	}
-
+	//
 	public async Task<string> GetPostForQuote(Post post, User user, bool forcePlainText)
 	{
 		if (post == null)
@@ -140,7 +140,7 @@ public class PostService : IPostService
 			quote = $"<blockquote><i>{post.Name} said:</i><br />{_textParsingService.HtmlToClientHtml(post.FullText)}</blockquote><p> </p>";
 		return quote;
 	}
-
+	//Удалить пост
 	public async Task Delete(Post post, User user)
 	{
 		if (user.UserID == post.UserID || user.IsInRole(PermanentRoles.Moderator))
@@ -167,7 +167,7 @@ public class PostService : IPostService
 		else
 			throw new InvalidOperationException("User must be Moderator or author to delete post.");
 	}
-
+	//Отменить удаления поста
 	public async Task Undelete(Post post, User user)
 	{
 		if (user.IsInRole(PermanentRoles.Moderator))
@@ -189,17 +189,17 @@ public class PostService : IPostService
 		else
 			throw new InvalidOperationException("User must be Moderator to undelete post.");
 	}
-
+	//Получить IP 
 	public async Task<List<IPHistoryEvent>> GetIPHistory(string ip, DateTime start, DateTime end)
 	{
 		return await _postRepository.GetIPHistory(ip, start, end);
 	}
-
+	//Получить последний пост в теме
 	public async Task<int> GetLastPostID(int topicID)
 	{
 		return await _postRepository.GetLastPostID(topicID);
 	}
-
+	//Получить проголосовших в посту
 	public async Task<VotePostContainer> GetVoters(Post post)
 	{
 		var results = await _postRepository.GetVotes(post.PostID);
@@ -212,12 +212,12 @@ public class PostService : IPostService
 		};
 		return container;
 	}
-
+	//Получить количество проголосовавших
 	public async Task<int> GetVoteCount(Post post)
 	{
 		return await _postRepository.GetVoteCount(post.PostID);
 	}
-
+	//Получить проголосовавших постов пользователем
 	public async Task<List<int>> GetVotedPostIDs(User user, List<Post> posts)
 	{
 		if (user == null)
@@ -225,13 +225,13 @@ public class PostService : IPostService
 		var ids = posts.Select(x => x.PostID).ToList();
 		return await _postRepository.GetVotedPostIDs(user.UserID, ids);
 	}
-
+	//Сгенирировать распарщенный текс для превью
 	public string GenerateParsedTextPreview(string text, bool isPlainText)
 	{
 		var result = isPlainText ? _textParsingService.ForumCodeToHtml(text) : _textParsingService.ClientHtmlToHtml(text);
 		return result;
 	}
-
+	//Переключатель для голосование
 	public async Task<Tuple<int, bool>> ToggleVoteReturnCountAndIsVoted(Post post, User user, string userUrl, string topicUrl, string topicTitle)
 	{
 		if (user == null || post == null || post.UserID == user.UserID)

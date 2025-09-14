@@ -8,6 +8,7 @@ public interface ITimeFormatStringService
 
 public class TimeFormatStringService : ITimeFormatStringService
 {
+	//Получить стандарт времени
 	public TimeFormats GeTimeFormats()
 	{
 		var formats = new TimeFormats
@@ -20,7 +21,7 @@ public class TimeFormatStringService : ITimeFormatStringService
 		};
 		return formats;
 	}
-
+	//Получить стандарт времени как json
 	public string GetTimeFormatsAsJson()
 	{
 		var formats = GeTimeFormats();

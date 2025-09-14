@@ -19,6 +19,7 @@ public class FavoriteTopicService : IFavoriteTopicService
 	private readonly ISettingsManager _settingsManager;
 	private readonly IFavoriteTopicsRepository _favoriteTopicRepository;
 
+	//Получить список любимых категорий пользователя по страницам
 	public async Task<Tuple<List<Topic>, PagerContext>> GetTopics(User user, int pageIndex)
 	{
 		var pageSize = _settingsManager.Current.TopicsPerPage;
@@ -30,16 +31,19 @@ public class FavoriteTopicService : IFavoriteTopicService
 		return Tuple.Create(topics, pagerContext);
 	}
 
+	//Проверить является тема избранной у пользователя
 	public async Task<bool> IsTopicFavorite(int userID, int topicID)
 	{
 		return await _favoriteTopicRepository.IsTopicFavorite(userID, topicID);
 	}
 
+	//Добавить тему в избранное
 	public async Task AddFavoriteTopic(User user, Topic topic)
 	{
 		await _favoriteTopicRepository.AddFavoriteTopic(user.UserID, topic.TopicID);
 	}
 
+	//Удалить из избранного
 	public async Task RemoveFavoriteTopic(User user, Topic topic)
 	{
 		await _favoriteTopicRepository.RemoveFavoriteTopic(user.UserID, topic.TopicID);

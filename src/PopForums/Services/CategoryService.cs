@@ -26,16 +26,19 @@ public class CategoryService : ICategoryService
 	private readonly ICategoryRepository _categoryRepository;
 	private readonly IForumRepository _forumRepository;
 
+	//Получить категорию по ИД
 	public async Task<Category> Get(int categoryID)
 	{
 		return await _categoryRepository.Get(categoryID);
 	}
 
+	//Получить все категории
 	public async Task<List<Category>> GetAll()
 	{
 		return await _categoryRepository.GetAll();
 	}
 
+	//Создать категорию
 	public async Task<Category> Create(string title)
 	{
 		var newCategory = await _categoryRepository.Create(title, -2);
@@ -43,7 +46,8 @@ public class CategoryService : ICategoryService
 		newCategory.SortOrder = 0;
 		return newCategory;
 	}
-
+	
+	//Удалить категорию по ИД
 	public async Task Delete(int categoryID)
 	{
 		var category = await _categoryRepository.Get(categoryID);
@@ -52,6 +56,7 @@ public class CategoryService : ICategoryService
 		await Delete(category);
 	}
 
+	//Удалить категорию по объекту
 	public async Task Delete(Category category)
 	{
 		var forumResult = await _forumRepository.GetAll();
@@ -61,6 +66,7 @@ public class CategoryService : ICategoryService
 		await _categoryRepository.Delete(category.CategoryID);
 	}
 
+	//Перемименновать категорию по ИД
 	public async Task UpdateTitle(int categoryID, string newTitle)
 	{
 		var category = await _categoryRepository.Get(categoryID);
@@ -69,12 +75,14 @@ public class CategoryService : ICategoryService
 		await UpdateTitle(category, newTitle);
 	}
 
+	//Переименновать категорию по объекту
 	public async Task UpdateTitle(Category category, string newTitle)
 	{
 		category.Title = newTitle;
 		await _categoryRepository.Update(category);
 	}
 
+	//Отсортировать категории
 	private async Task ChangeCategorySortOrder(Category category, int change)
 	{
 		var categories = await GetAll();
@@ -88,6 +96,7 @@ public class CategoryService : ICategoryService
 		}
 	}
 
+	//Поднять категорию в списке
 	public async Task MoveCategoryUp(int categoryID)
 	{
 		var category = await _categoryRepository.Get(categoryID);
@@ -96,6 +105,7 @@ public class CategoryService : ICategoryService
 		await MoveCategoryUp(category);
 	}
 
+	//Опустить категорию
 	public async Task MoveCategoryDown(int categoryID)
 	{
 		var category = await _categoryRepository.Get(categoryID);
@@ -103,13 +113,15 @@ public class CategoryService : ICategoryService
 			throw new Exception($"Can't move CategoryID {categoryID} down because it does not exist.");
 		await MoveCategoryDown(category);
 	}
-
+	
+	//Увеличить значение для порядка сортировки
 	public async Task MoveCategoryUp(Category category)
 	{
 		const int change = -3;
 		await ChangeCategorySortOrder(category, change);
 	}
 
+	//Уменьшить значение для порядка сортировки
 	public async Task MoveCategoryDown(Category category)
 	{
 		const int change = 3;
